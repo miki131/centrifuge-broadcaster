@@ -1,5 +1,5 @@
 {
-    "name": "emprove/centrifuge-broadcaster",
+    "name": "miki131/centrifuge-broadcaster",
     "type": "library",
     "description": "Centrifuge broadcaster for laravel >= 5.7",
     "keywords": ["laravel", "centrifuge", "centrifugo", "broadcaster"],
