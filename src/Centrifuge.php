@@ -144,13 +144,13 @@ class Centrifuge implements CentrifugeContract
 	}
 
 	/**
-	 * Get stats information about running server nodes.
+	 * Get information about running server nodes.
 	 *
 	 * @return mixed
 	 */
-	public function stats()
+	public function info()
 	{
-		return $this->send('stats');
+		return $this->send('info');
 	}
 
 	/**
