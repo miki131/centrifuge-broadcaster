@@ -71,11 +71,11 @@ interface Centrifuge
 	public function channels();
 
 	/**
-	 * Get stats information about running server nodes.
+	 * Get information about running server nodes.
 	 *
 	 * @return mixed
 	 */
-	public function stats();
+	public function info();
 
 	/**
 	 * Generate api sign.
