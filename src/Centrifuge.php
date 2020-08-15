@@ -201,6 +201,29 @@ class Centrifuge implements CentrifugeContract
 		return $result;
 	}
 
+	public function pipe(array $commands)
+	{
+		$data = '';
+		
+		foreach ($commands as $item) {
+			$data .= json_encode(['method' => $item[0], 'params' => $item[1]]);
+		}
+		
+		try {
+			$config = $this->prepareConfig($data);
+			
+			$response = $this->httpClient->post($this->prepareUrl(), $config->toArray());
+			
+			$finally = array_map(function ($line) {
+				return json_decode($line, true);
+			}, explode("\n", trim((string) $response->getBody())));
+		} catch (ClientException $e) {
+			throw $e;
+		}
+		
+		return $finally;
+	}
+
 	/**
 	 * Send message to centrifuge server from http client.
 	 *
@@ -213,27 +236,8 @@ class Centrifuge implements CentrifugeContract
 	{
 		$json = json_encode(['method' => $method, 'params' => $params]);
 
-		$headers = [
-			'Content-type'  => 'application/json',
-			'Authorization' => 'apikey ' . collect($this->config)->get('api_key'),
-		];
-
 		try {
-			$url = parse_url($this->prepareUrl());
-
-			$config = collect([
-				'headers'     => $headers,
-				'body'        => $json,
-				'http_errors' => false,
-			]);
-
-			if ($url['scheme'] == 'https') {
-				$config->put('verify', collect($this->config)->get('verify', false));
-
-				if (collect($this->config)->get('ssl_key')) {
-					$config->put('ssl_key', collect($this->config)->get('ssl_key'));
-				}
-			}
+			$config = $this->prepareConfig($json);
 
 			$response = $this->httpClient->post($this->prepareUrl(), $config->toArray());
 
@@ -259,6 +263,32 @@ class Centrifuge implements CentrifugeContract
 		}
 
 		return $address;
+	}
+
+	protected function prepareConfig($body)
+	{
+		$headers = [
+			'Content-type'  => 'application/json',
+			'Authorization' => 'apikey ' . collect($this->config)->get('api_key'),
+		];
+		
+		$config = collect([
+			'headers'     => $headers,
+			'body'        => $body,
+			'http_errors' => false,
+		]);
+		
+		$url = parse_url($this->prepareUrl());
+		
+		if ($url['scheme'] == 'https') {
+			$config->put('verify', collect($this->config)->get('verify', false));
+			
+			if (collect($this->config)->get('ssl_key')) {
+				$config->put('ssl_key', collect($this->config)->get('ssl_key'));
+			}
+		}
+		
+		return $config;
 	}
 
 	/**
